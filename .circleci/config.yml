@@ -3,8 +3,27 @@ version: 2.1
 orbs:
   terraform: circleci/terraform@3.0.1
 
+jobs:
+  build:
+    docker:
+      - image: cimg/node:18.0
+    steps:
+      # Checkout the code from the repo
+      - checkout
+      # Install and cache dependencies from package.json
+      - node/install-packages
+      # Run the tests
+      - run:
+          name: Run tests
+          command: |
+            npm start & 
+            npm test
+
 workflows:
   version: 2
+  build_node:
+    jobs:
+      - build
   deploy_infrastructure:
     jobs:
       - terraform/fmt:

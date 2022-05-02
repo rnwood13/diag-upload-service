@@ -4,12 +4,16 @@
   "description": "service for uploading diags",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "start": "node app/index.js",
+    "test": "mocha --reporter spec"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1",
-    "express-fileupload": "^1.2.1"
+    "chai": "^4.3.6",
+    "express": "^4.18.1",
+    "express-fileupload": "^1.3.1",
+    "mocha": "^10.0.0",
+    "request": "^2.88.2"
   }
 }
