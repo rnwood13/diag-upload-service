@@ -72,7 +72,7 @@ jobs:
       - run:
           name: terraform apply
           command: |
-            terraform -chdir=./terraform apply -auto-approve plan.out -var ecr_image_tag=$CIRCLE_BRANCH-$CIRCLE_SHA1
+            terraform -chdir=./terraform apply -input=false -auto-approve plan.out
       - persist_to_workspace:
           root: .
           paths:
