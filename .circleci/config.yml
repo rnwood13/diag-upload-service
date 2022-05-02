@@ -3,9 +3,10 @@ version: 2.1
 orbs:
   node: circleci/node@5.0.2
   terraform: circleci/terraform@3.0.1
+  aws-cli: circleci/aws-cli@3.1.0
 
 jobs:
-  build:
+  test:
     docker:
       - image: cimg/node:18.0
     steps:
@@ -20,13 +21,41 @@ jobs:
             npm start & 
             npm test
 
+  build:
+    docker:
+      # - image: docker:18.06.3-ce-git # enable the docker build support
+      - image: cimg/node:18.0
+    environment:
+      PROJECT_NAME: diag_upload_service
+    steps:
+      # Checkout the code from the repo
+      - checkout
+      # Enable Docker in Docker
+      - setup_remote_docker
+      # Setup AWS CLI
+      - aws-cli/setup:
+          profile-name: default
+      - run:
+          name: Build and Push Image
+          command: |
+            docker --version
+            export ECR_REPO_URL=$(aws ecr describe-repositories --query "repositories[?repositoryName=='$PROJECT_NAME'].repositoryUri" --output text)
+            export ECR_REPO_NAME=$PROJECT_NAME
+            aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REPO_URL
+            docker build -t $ECR_REPO_NAME .
+            docker tag $ECR_REPO_NAME:latest $ECR_REPO_URL:$CIRCLE_BRANCH
+            docker push $ECR_REPO_URL:$CIRCLE_BRANCH
+            echo "Docker build sucessful for $ECR_REPO_NAME $CIRCLE_BRANCH"
+
 workflows:
-  version: 2
-  build_node:
+  test_build_and_deploy:
     jobs:
-      - build
-  deploy_infrastructure:
-    jobs:
+      - test
+      - build:
+          # Attach to CircleCI context that contains AWS key and ID
+          context: aws
+          requires:
+            - test
       - terraform/fmt:
           path: ./terraform
           checkout: true
@@ -37,6 +66,7 @@ workflows:
           requires:
             - terraform/fmt
       - terraform/plan:
+          var: ecr_image_tag=main
           path: ./terraform
           checkout: true
           context: aws
@@ -50,7 +80,9 @@ workflows:
               only: main
           requires:
             - terraform/plan
+            - build
       - terraform/apply:
+          var: ecr_image_tag=main
           path: ./terraform
           attach-workspace: true
           context: aws

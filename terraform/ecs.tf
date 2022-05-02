@@ -30,7 +30,7 @@ resource "aws_ecs_task_definition" "diag_upload_service" {
   container_definitions = jsonencode([
     {
       name              = var.project_name
-      image             = "885971397149.dkr.ecr.us-east-2.amazonaws.com/diag_upload_service:latest"
+      image             = "${aws_ecr_repository.diag_upload_service.repository_url}:${var.ecr_image_tag}"
       memoryReservation = 512
       essential         = true
       portMappings = [
@@ -42,7 +42,7 @@ resource "aws_ecs_task_definition" "diag_upload_service" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-region        = "us-east-2"
+          awslogs-region        = var.vpc_region
           awslogs-group         = "/ecs/${var.project_name}"
           awslogs-stream-prefix = "ecs"
         }
