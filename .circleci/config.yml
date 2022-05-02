@@ -48,7 +48,7 @@ jobs:
             echo "Docker build sucessful for $ECR_REPO_NAME $CIRCLE_BRANCH-$CIRCLE_SHA1"
 
   terraform-plan:
-    working_directory: ./terraform
+    working_directory: /tmp/project
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
@@ -56,8 +56,8 @@ jobs:
       - run:
           name: terraform init & plan
           command: |
-            terraform init -input=false -no-color 
-            terraform plan -input=false -no-color -out=plan.out
+            terraform -chdir=./terraform init -input=false -no-color 
+            terraform -chdir=./terraform plan -input=false -no-color -out=plan.out
       - persist_to_workspace:
           root: .
           paths:
