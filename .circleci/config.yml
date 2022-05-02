@@ -48,7 +48,6 @@ jobs:
             echo "Docker build sucessful for $ECR_REPO_NAME $CIRCLE_BRANCH"
 
 workflows:
-  version: 2
   test_build_and_deploy:
     jobs:
       - test
