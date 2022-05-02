@@ -47,6 +47,22 @@ jobs:
             docker push $ECR_REPO_URL:$CIRCLE_BRANCH-$CIRCLE_SHA1
             echo "Docker build sucessful for $ECR_REPO_NAME $CIRCLE_BRANCH-$CIRCLE_SHA1"
 
+  terraform-plan:
+    working_directory: ./terraform
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          name: terraform init & plan
+          command: |
+            terraform init -input=false -no-color 
+            terraform plan -input=false -no-color -out=plan.out
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
 workflows:
   test_build_and_deploy:
     jobs:
@@ -65,18 +81,16 @@ workflows:
           context: aws
           requires:
             - terraform/fmt
-      - terraform/plan:
-          var: ecr_image_tag=main
-          path: ./terraform
-          checkout: true
+      # - terraform/plan:
+      #     var: ecr_image_tag=main
+      #     path: ./terraform
+      #     checkout: true
+      #     context: aws
+      #     persist-workspace: true
+      #     requires:
+      #       - terraform/validate
+      - terraform-plan:
           context: aws
-          persist-workspace: true
-          pre-steps:
-            - run:
-                command: |
-                  pwd
-                  ls -lah
-                  sed -i -E 's/(ecr_image_tag\s+= \")(main)\"/\1'"$CIRCLE_BRANCH-$CIRCLE_SHA1"'\"/g' ./terraform/terraform.tfvars
           requires:
             - terraform/validate
       - hold:
