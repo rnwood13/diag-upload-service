@@ -63,6 +63,21 @@ jobs:
           paths:
             - .
 
+  terraform-apply:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform apply
+          command: |
+            terraform -chdir=./terraform apply -auto-approve plan.out -var ecr_image_tag=$CIRCLE_BRANCH-$CIRCLE_SHA1
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
 workflows:
   test_build_and_deploy:
     jobs:
@@ -81,14 +96,6 @@ workflows:
           context: aws
           requires:
             - terraform/fmt
-      # - terraform/plan:
-      #     var: ecr_image_tag=main
-      #     path: ./terraform
-      #     checkout: true
-      #     context: aws
-      #     persist-workspace: true
-      #     requires:
-      #       - terraform/validate
       - terraform-plan:
           context: aws
           requires:
@@ -101,13 +108,10 @@ workflows:
           requires:
             - terraform-plan
             - build
-      - terraform/apply:
-          var: ecr_image_tag=main
-          path: ./terraform
-          attach-workspace: true
+      - terraform-apply:
           context: aws
-          filters:
-            branches:
-              only: main
+          # filters:
+          #   branches:
+          #     only: main
           requires:
             - hold
