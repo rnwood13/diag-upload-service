@@ -102,9 +102,9 @@ workflows:
             - terraform/validate
       - hold:
           type: approval
-          filters:
-            branches:
-              only: main
+          # filters:
+          #   branches:
+          #     only: main
           requires:
             - terraform-plan
             - build
