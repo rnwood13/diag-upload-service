@@ -57,7 +57,7 @@ jobs:
           name: terraform init & plan
           command: |
             terraform -chdir=./terraform init -input=false -no-color 
-            terraform -chdir=./terraform plan -input=false -no-color -out=plan.out
+            terraform -chdir=./terraform plan -input=false -no-color -out=plan.out -var ecr_image_tag=$CIRCLE_BRANCH-$CIRCLE_SHA1
       - persist_to_workspace:
           root: .
           paths:
