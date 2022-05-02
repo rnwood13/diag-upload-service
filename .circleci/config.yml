@@ -66,19 +66,11 @@ workflows:
           requires:
             - terraform/fmt
       - terraform/plan:
+          var: ecr_image_tag=main
           path: ./terraform
           checkout: true
           context: aws
           persist-workspace: true
-          pre-steps:
-            - run:
-                command: |
-                  export TF_VAR_ecr_image_tag=$CIRCLE_BRANCH
-                  echo $CIRCLE_BRANCH
-          post-steps:
-            - run:
-                command: |
-                  env
           requires:
             - terraform/validate
             - build
@@ -90,6 +82,7 @@ workflows:
           requires:
             - terraform/plan
       - terraform/apply:
+          var: ecr_image_tag=main
           path: ./terraform
           attach-workspace: true
           context: aws
