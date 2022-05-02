@@ -70,11 +70,7 @@ workflows:
           checkout: true
           context: aws
           persist-workspace: true
-          pre-steps:
-            - run:
-                command: |
-                  export TF_VAR_ecr_image_tag=$CIRCLE_BRANCH
-                  echo $CIRCLE_BRANCH
+          var: ecr_image_tag=$CIRCLE_BRANCH
           requires:
             - terraform/validate
             - build
