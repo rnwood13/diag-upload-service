@@ -3,5 +3,5 @@ output "ecr_repository_url" {
 }
 
 output "alb_url" {
-  value = "http://${module.alb.lb_dns_name}"
+  value = var.elb_enable ? "http://${module.alb.lb_dns_name}" : null
 }
