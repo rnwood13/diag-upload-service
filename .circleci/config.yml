@@ -73,7 +73,7 @@ workflows:
           persist-workspace: true
           pre-steps:
             - run:
-                command: sed -i -E 's/(ecr_image_tag\s+= \")(main)\"/\1'"$CIRCLE_BRANCH-$CIRCLE_SHA1"'\"/g' terraform.tfvars
+                command: sed -i -E 's/(ecr_image_tag\s+= \")(main)\"/\1'"$CIRCLE_BRANCH-$CIRCLE_SHA1"'\"/g' ./terraform/terraform.tfvars
           requires:
             - terraform/validate
       - hold:
