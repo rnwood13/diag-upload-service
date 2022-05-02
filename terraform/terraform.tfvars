@@ -9,4 +9,3 @@ vpc_enable_vpn_gateway = false
 vpc_enable_nat_gateway = true
 ecs_enable             = true
 elb_enable             = true
-ecr_image_tag          = "main"
