@@ -99,7 +99,7 @@ workflows:
             branches:
               only: main
           requires:
-            - terraform/plan
+            - terraform-plan
             - build
       - terraform/apply:
           var: ecr_image_tag=main
