@@ -43,9 +43,9 @@ jobs:
             export ECR_REPO_NAME=$PROJECT_NAME
             aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REPO_URL
             docker build -t $ECR_REPO_NAME .
-            docker tag $ECR_REPO_NAME:latest $ECR_REPO_URL:$CIRCLE_BRANCH
-            docker push $ECR_REPO_URL:$CIRCLE_BRANCH
-            echo "Docker build sucessful for $ECR_REPO_NAME $CIRCLE_BRANCH"
+            docker tag $ECR_REPO_NAME:latest $ECR_REPO_URL:$CIRCLE_BRANCH-$CIRCLE_SHA1
+            docker push $ECR_REPO_URL:$CIRCLE_BRANCH-$CIRCLE_SHA1
+            echo "Docker build sucessful for $ECR_REPO_NAME $CIRCLE_BRANCH-$CIRCLE_SHA1"
 
 workflows:
   test_build_and_deploy:
@@ -71,6 +71,10 @@ workflows:
           checkout: true
           context: aws
           persist-workspace: true
+          pre-steps:
+            -run:
+              command: |
+                sed -i -E 's/(ecr_image_tag\s+= \")(main)\"/\1'"$CIRCLE_BRANCH-$CIRCLE_SHA1"'\"/g' terraform.tfvars
           requires:
             - terraform/validate
       - hold:
