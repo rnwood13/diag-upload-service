@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  node: circleci/node@5.0.2
   terraform: circleci/terraform@3.0.1
 
 jobs:
