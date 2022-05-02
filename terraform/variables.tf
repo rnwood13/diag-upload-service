@@ -42,3 +42,13 @@ variable "vpc_enable_vpn_gateway" {
   type    = bool
   default = false
 }
+
+variable "ecs_enable" {
+  type    = bool
+  default = false
+}
+
+variable "elb_enable" {
+  type    = bool
+  default = false
+}

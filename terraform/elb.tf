@@ -2,7 +2,7 @@ module "alb" {
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 6.0"
 
-  create_lb = true
+  create_lb = var.elb_enable
 
   name = "${var.project_name}-alb"
 
