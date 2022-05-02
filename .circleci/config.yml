@@ -43,9 +43,40 @@ jobs:
             export ECR_REPO_NAME=$PROJECT_NAME
             aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REPO_URL
             docker build -t $ECR_REPO_NAME .
-            docker tag $ECR_REPO_NAME:latest $ECR_REPO_URL:$CIRCLE_BRANCH
-            docker push $ECR_REPO_URL:$CIRCLE_BRANCH
-            echo "Docker build sucessful for $ECR_REPO_NAME $CIRCLE_BRANCH"
+            docker tag $ECR_REPO_NAME:latest $ECR_REPO_URL:$CIRCLE_BRANCH-$CIRCLE_SHA1
+            docker push $ECR_REPO_URL:$CIRCLE_BRANCH-$CIRCLE_SHA1
+            echo "Docker build sucessful for $ECR_REPO_NAME $CIRCLE_BRANCH-$CIRCLE_SHA1"
+
+  terraform-plan:
+    working_directory: /tmp/project
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          name: terraform init & plan
+          command: |
+            terraform -chdir=./terraform init -input=false
+            terraform -chdir=./terraform plan -input=false -out=plan.out -var ecr_image_tag=$CIRCLE_BRANCH-$CIRCLE_SHA1
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-apply:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform apply
+          command: |
+            terraform -chdir=./terraform apply -auto-approve plan.out
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 
 workflows:
   test_build_and_deploy:
@@ -65,12 +96,8 @@ workflows:
           context: aws
           requires:
             - terraform/fmt
-      - terraform/plan:
-          var: ecr_image_tag=main
-          path: ./terraform
-          checkout: true
+      - terraform-plan:
           context: aws
-          persist-workspace: true
           requires:
             - terraform/validate
       - hold:
@@ -79,12 +106,9 @@ workflows:
             branches:
               only: main
           requires:
-            - terraform/plan
+            - terraform-plan
             - build
-      - terraform/apply:
-          var: ecr_image_tag=main
-          path: ./terraform
-          attach-workspace: true
+      - terraform-apply:
           context: aws
           filters:
             branches:
