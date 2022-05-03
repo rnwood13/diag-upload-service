@@ -69,3 +69,12 @@ variable "ecr_image_tag" {
   type        = string
   default     = "latest"
 }
+
+variable "ecs_efs_string_vars" {
+  type = map(any)
+  default = {
+    performance_mode = "generalPurpose",
+    throughput_mode  = "bursting",
+    transition_to_ia = "AFTER_30_DAYS",
+  }
+}

@@ -39,6 +39,12 @@ resource "aws_ecs_task_definition" "diag_upload_service" {
           hostPort      = 8000
         }
       ]
+      mountPoints = [
+        {
+          containerPath = "/usr/app/diags"
+          sourceVolume  = "ecs-efs"
+        }
+      ]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -49,6 +55,15 @@ resource "aws_ecs_task_definition" "diag_upload_service" {
       }
     }
   ])
+
+  volume {
+    name = "ecs-efs"
+
+    efs_volume_configuration {
+      file_system_id     = aws_efs_file_system.diag_upload_service.id
+      transit_encryption = "ENABLED"
+    }
+  }
 
   cpu                      = 256
   memory                   = 512
