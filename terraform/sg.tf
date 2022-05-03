@@ -73,6 +73,13 @@ module "security_group_ecs_efs" {
       description              = "NFS inbound rule so resources in ECS cluster can communicate with EFS"
       source_security_group_id = module.security_group_diag_upload_service.security_group_id
     },
+    {
+      from_port                = 2999
+      to_port                  = 2999
+      protocol                 = "tcp"
+      description              = "NFS inbound rule so resources in ECS cluster can communicate with EFS"
+      source_security_group_id = module.security_group_diag_upload_service.security_group_id
+    },
   ]
 
   egress_with_cidr_blocks = [

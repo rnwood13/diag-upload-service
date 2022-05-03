@@ -15,5 +15,5 @@ resource "aws_efs_mount_target" "diag_upload_service" {
   for_each        = toset(module.vpc.private_subnets)
   file_system_id  = aws_efs_file_system.diag_upload_service.id
   subnet_id       = each.value
-  security_groups = [module.security_group_diag_upload_service.security_group_id]
+  security_groups = [module.security_group_ecs_efs.security_group_id]
 }

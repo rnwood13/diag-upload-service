@@ -37,6 +37,7 @@ resource "aws_ecs_task_definition" "diag_upload_service" {
         {
           containerPort = 8000
           hostPort      = 8000
+          protocol      = "tcp"
         }
       ]
       mountPoints = [
@@ -60,8 +61,10 @@ resource "aws_ecs_task_definition" "diag_upload_service" {
     name = "ecs-efs"
 
     efs_volume_configuration {
-      file_system_id     = aws_efs_file_system.diag_upload_service.id
-      transit_encryption = "ENABLED"
+      file_system_id          = aws_efs_file_system.diag_upload_service.id
+      transit_encryption      = "ENABLED"
+      transit_encryption_port = 2999
+      root_directory          = "/"
     }
   }
 
@@ -75,11 +78,12 @@ resource "aws_ecs_task_definition" "diag_upload_service" {
 resource "aws_ecs_service" "diag_upload_service" {
   count = var.ecs_enable ? 1 : 0
 
-  name            = "${var.project_name}-service"
-  cluster         = aws_ecs_cluster.diag_upload_service.id
-  task_definition = aws_ecs_task_definition.diag_upload_service.arn
-  launch_type     = "FARGATE"
-  desired_count   = 2
+  name             = "${var.project_name}-service"
+  cluster          = aws_ecs_cluster.diag_upload_service.id
+  task_definition  = aws_ecs_task_definition.diag_upload_service.arn
+  launch_type      = "FARGATE"
+  platform_version = "1.4.0"
+  desired_count    = 2
 
   network_configuration {
     assign_public_ip = false
