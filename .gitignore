@@ -1,4 +1,7 @@
 ### NODE ###
+# Diag test files for local testing
+app/diags/*
+
 # Logs
 logs
 *.log
