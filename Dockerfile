@@ -4,7 +4,7 @@ WORKDIR /usr/app
 COPY app/ /usr/app/
 COPY package.json /usr/app/
 
-RUN mkdir /usr/app/diags && npm install
+RUN mkdir -p /usr/app/diags && npm install
 
 EXPOSE 8000
 
