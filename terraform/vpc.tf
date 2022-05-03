@@ -11,4 +11,7 @@ module "vpc" {
 
   enable_nat_gateway = var.vpc_enable_nat_gateway
   enable_vpn_gateway = var.vpc_enable_vpn_gateway
+
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 }

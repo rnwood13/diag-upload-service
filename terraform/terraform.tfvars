@@ -9,3 +9,8 @@ vpc_enable_vpn_gateway = false
 vpc_enable_nat_gateway = true
 ecs_enable             = true
 elb_enable             = true
+ecs_efs_string_vars = {
+  performance_mode = "generalPurpose",
+  throughput_mode  = "bursting",
+  transition_to_ia = "AFTER_30_DAYS",
+}
