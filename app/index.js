@@ -37,15 +37,17 @@ app.get('/download/:id', (req, res) => {
 });
 
 app.get('/', (req, res) => {
+    // Present HTML page
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.get('/files', (req, res) => {
+    // List files currently in directory
     fs.readdir(diagDir, function (err, files) {
         if (err) {
             return console.log('Unable to scan directory: ' + err);
         } 
-        //listing all files in EFS
-        files.forEach(function (file) {
-            // Display list of files to console
-            console.log(file); 
-        });
+        console.log('Files currently available: ' + JSON.stringify(files));
     });
 
     // Present HTML page
