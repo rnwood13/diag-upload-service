@@ -1,5 +1,5 @@
 const fileUpload = require('express-fileupload');
-// const basicAuth = require('express-basic-auth');
+const basicAuth = require('express-basic-auth');
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -7,14 +7,14 @@ const fs = require('fs');
 const port = 8000;
 
 const diagDir = path.join(__dirname, 'diags');
-// const directoryPath = path.join(__dirname, diagDir);
 app.use(fileUpload());
 app.use(express.static(diagDir));
 
-// app.use(basicAuth({
-//     users: { 'admin': 'admin' },
-//     challenge: true
-// }));
+app.use(basicAuth({
+    users: { 'admin': 'admin' },
+    challenge: true,
+    realm: 'myRealm'
+}));
 
 app.post('/upload', (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
@@ -38,7 +38,7 @@ app.get('/download/:id', (req, res) => {
 
 app.get('/', (req, res) => {
     // Present HTML page
-    res.sendFile(path.join(__dirname, "index.html"));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/files', (req, res) => {
@@ -48,10 +48,10 @@ app.get('/files', (req, res) => {
             return console.log('Unable to scan directory: ' + err);
         } 
         console.log('Files currently available: ' + JSON.stringify(files));
-    });
 
-    // Present HTML page
-    res.sendFile(path.join(__dirname, "index.html"));
+        // Return list of available files
+        res.send(files);
+    });
 });
 
 app.listen(port, () => {

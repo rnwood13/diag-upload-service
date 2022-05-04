@@ -1,14 +1,101 @@
-var expect = require("chai").expect;
-var request = require("request");
+var expect = require('chai').expect;
+    supertest = require('supertest');
+var request = require('request');
+var path = require('path');
+var superrequest = supertest('localhost:8000')
 
-describe("Diagnostics Upload Service API", function () {
+var fs = require('fs');
 
-    describe("Health Check", function () {
+describe('Diagnostics Upload Service API', function () {
+    let username = 'admin'
+    let password = 'admin'
+    let auth = 'Basic ' + Buffer.from(username + ':' + password).toString('base64');
+    let headers = {
+        'Host': 'localhost',
+        'Authorization': auth
+    };
 
-        var url = "http://localhost:8000/";
+    describe('Basic Health Check', function () {
 
-        it("returns status 200", function (done) {
+        let url = 'http://localhost:8000/';
+
+        it('returns status 401 - Unauthorized', function (done) {
             request(url, function (error, response, body) {
+                expect(response.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+    });
+
+    describe('Basic Auth Check', function () {
+
+        let url = 'http://localhost:8000/';
+
+        it('returns status 200', function (done) {
+            request.get({
+                url: url,
+                headers: headers
+            }, function (error, response, body) {
+                expect(response.statusCode).to.equal(200);
+                done();
+            });
+        });
+
+    });
+
+    describe('Upload Test', function () {   
+        fs.mkdir(path.join(__dirname, '../app/diags'), 
+            { recursive: true}, (err) => {
+            if (err) {
+                return console.error(err);
+            }
+            console.log('Directory created successfully.');
+        });
+
+        fs.writeFile(path.join(__dirname, '../app/diags/test.tgz'), 'This is a test', function (err) {
+            if (err) throw err;
+            console.log('Test file app/diags/test.tgz was created successfully.');
+          });
+
+        it('returns status 200', function (done) {
+            superrequest.post('/upload')
+            .set('Authorization', auth)
+            .field('Content-Type', 'multipart/form-data')
+            .attach('diag', path.join(__dirname, '../app/diags/test.tgz'))
+            .end(function (error, response, body) {
+                expect(response.status).to.equal(200);
+                done();
+            });
+        });
+
+    });
+
+    describe('List Files Test', function () {
+
+        let url = 'http://localhost:8000/files';
+
+        it('returnts status 200', function (done) {
+            request.get({
+                url: url,
+                headers: headers
+            }, function (error, response, body) {
+                expect(response.body).to.include('test.tgz');
+                done();
+            });
+        });
+
+    });
+
+    describe('Download File Test', function () {
+
+        let url = 'http://localhost:8000/download/test.tgz';
+
+        it('returnts status 200', function (done) {
+            request.get({
+                url: url,
+                headers: headers
+            }, function (error, response, body) {
                 expect(response.statusCode).to.equal(200);
                 done();
             });
