@@ -1,6 +1,7 @@
 var expect = require('chai').expect;
     supertest = require('supertest');
 var request = require('request');
+var path = require('path');
 var superrequest = supertest('localhost:8000')
 
 var fs = require('fs');
@@ -44,7 +45,7 @@ describe('Diagnostics Upload Service API', function () {
     });
 
     describe('Upload Test', function () {
-        fs.writeFile('app/diags/test.tgz', 'This is a test', function (err) {
+        fs.writeFile(path.join(__dirname, '../app/diags/test.tgz'), 'This is a test', function (err) {
             if (err) throw err;
             console.log('Test file app/diags/test.tgz was created successfully.');
           });
@@ -53,11 +54,9 @@ describe('Diagnostics Upload Service API', function () {
             superrequest.post('/upload')
             .set('Authorization', auth)
             .field('Content-Type', 'multipart/form-data')
-            .attach('diag', 'app/diags/test.tgz')
+            .attach('diag', path.join(__dirname, '../app/diags/test.tgz'))
             .end(function (error, response, body) {
-                if (error) {
-                    console.log(error);
-                } else expect(response.status).to.equal(200);
+                expect(response.status).to.equal(200);
                 done();
             });
         });
