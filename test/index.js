@@ -44,7 +44,15 @@ describe('Diagnostics Upload Service API', function () {
 
     });
 
-    describe('Upload Test', function () {
+    describe('Upload Test', function () {   
+        fs.mkdir(path.join(__dirname, '../app/diags'), 
+            { recursive: true}, (err) => {
+            if (err) {
+                return console.error(err);
+            }
+            console.log('Directory created successfully.');
+        });
+
         fs.writeFile(path.join(__dirname, '../app/diags/test.tgz'), 'This is a test', function (err) {
             if (err) throw err;
             console.log('Test file app/diags/test.tgz was created successfully.');
