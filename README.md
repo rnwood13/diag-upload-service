@@ -14,10 +14,20 @@ The app was designed with high availability, scalability, and observability in m
 
 ### Deploy
 
-- Copy or fork this repository, then go to the [CircleCI application](https://app.circleci.com/) and link the new repo  
+- Copy or fork this repository and modify how you see fit (for instance, change the basic auth username and password)  
+- Go to the [CircleCI application](https://app.circleci.com/) and link the new repo   
 - Run the pipeline and approve the manual HOLD step  
 - Copy the Terraform `alb_url` output from the `terraform-apply` job into a browser to access the application  
 - NOTE: You may need to deploy Terraform locally with a local state file first (see Development section below and read notes in `terraform/backend.tf`)
+
+### Usage
+
+The following examples include only the path - add the path after the domain.
+
+- `/` : The main page with a form for diagnostics files to be uploaded
+- `/upload` : Submit a multi-part upload - will usually be accessed via the main page form
+- `/download/<filename>` : Download a specific file - replace <filename> with the name of the file
+- `/files` : Get a list of files that are available to download
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -74,11 +84,12 @@ Please see Future Improvements for planned security improvements.
 - There is a Security Group on the EFS instance that only allows the ECS SG as a source
 - ECS utilizes transit encryption to EFS
 - Terraform state files are encrypted in S3 with DyanamoDB locking
-- The application uses basic authentication in the Node app by using `express-basic-auth`
+- The application uses basic authentication in the Node app by using `express-basic-auth` (currently set to admin/admin so be sure to change before deploying, or better yet, use a more secure auth mechanism)
 
-### Reliability
+### Reliability and Testing
 
-There are Node.js tests for the application using mocha and chai which tests that the application is production-ready.  
+There are Node.js unit tests for the application using mocha and chai which tests that the application is production-ready.  
+These include tests for each API endpoint ('/', '/upload', '/download/:id', '/files') as well as tests for basic auth.  
 See the `test/` directory for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -92,9 +103,14 @@ This section aims to call out these areas which can (and should) be implemented 
 - Use Route53 domain instead of ALB DNS address (see improvement note above)
 - Use ECS Autoscaling based on CPU utilization, memory utilization, or ALB requests
 - Use multiple environments for testing or staging before moving to production
+- Improve auth security by moving away from basic auth and using something like API Gateway or SSO
 - Restrict downloads by authentication role so only those with proper permissions can download the diagnostics files
 - Alerting via SNS when an alarm is triggered
 - Alerting via SNS whenever a diagnostics file is uploaded
+- Restrict uploads to only `*.tgz` filetypes 
+- Add nicer HTML and CSS
+- Provide a better downloads/files page with a list of files and button to download
+- Make app support concurrent requests with async
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -120,5 +136,14 @@ node app/index.js
 ```
 
 Go to a browser at `http://localhost:8000` to upload and download diagnostics files.  
+
+### Deploying Terraform
+
+Navigate to the `terraform/` directory and, optionally, update the `TF_VAR_ecr_image_tag` variable to customize the image deployed:
+
+```
+export TF_VAR_ecr_image_tag=my-tag
+terraform apply
+```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
