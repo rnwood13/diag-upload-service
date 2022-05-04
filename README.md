@@ -70,6 +70,8 @@ The workflow is this:
 5. Developer reviews the changes and approves the Hold
 6. The CircleCI pipeline continues by doing a Terraform apply, which updates the ECS application using the image build from step 4
 
+![CircleCI](images/circleci.png)
+
 See the public CircleCI pipeline connected to this repository for details.
 
 ### Security
